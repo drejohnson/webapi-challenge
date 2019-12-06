@@ -75,10 +75,7 @@ router.put("/:id", async (req, res) => {
     const project = await projectModel.get(id);
     const updatedProject = await projectModel.update(id, req.body);
 
-    if (!project)
-      return res
-        .status(404)
-        .json({ message: "The project with the specified ID does not exist." });
+    if (!project) return res.status(404).json(null);
 
     res.status(200).json(updatedProject);
   } catch (error) {
