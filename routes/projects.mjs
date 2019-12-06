@@ -1,5 +1,6 @@
 import express from "express";
 import projectModel from "../data/helpers/projectModel.js";
+import actionModel from "../data/helpers/actionModel.js";
 
 const router = express.Router();
 
@@ -60,6 +61,34 @@ router.post("/", async (req, res) => {
     res.status(201).send(project);
   } catch (error) {
     res.status(500).send({ error: error.message });
+  }
+});
+
+// Add new action
+router.post("/:id/actions", async (req, res) => {
+  const { id } = req.params;
+  const { description, notes } = req.body;
+
+  try {
+    const project = await projectModel.get(id);
+
+    if (!project)
+      return res
+        .status(404)
+        .json({ message: "The project with the specified ID does not exist." });
+
+    if (!description || !notes)
+      return res.status(400).json({
+        errorMessage: "Please provide description and notes for the action."
+      });
+
+    const newAction = await actionModel.insert(req.body);
+
+    return res.status(201).json(newAction);
+  } catch (error) {
+    res.status(500).json({
+      error: "There was an error while saving the action to the database"
+    });
   }
 });
 
