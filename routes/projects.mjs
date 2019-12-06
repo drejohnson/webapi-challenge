@@ -53,13 +53,39 @@ router.post("/", async (req, res) => {
   const { name, description } = req.body;
   if (!name || !description)
     return res.status(400).json({
-      errorMessage: "Please provide name and description for the post."
+      errorMessage: "Please provide name and description for the project."
     });
   try {
     const project = await projectModel.insert(req.body);
     res.status(201).send(project);
   } catch (error) {
     res.status(500).send({ error: error.message });
+  }
+});
+
+// Update projects
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!req.body)
+    return res
+      .status(500)
+      .json({ error: "Please provide values to update the project." });
+
+  try {
+    const project = await projectModel.get(id);
+    const updatedProject = await projectModel.update(id, req.body);
+
+    if (!project)
+      return res
+        .status(404)
+        .json({ message: "The project with the specified ID does not exist." });
+
+    res.status(200).json(updatedProject);
+  } catch (error) {
+    console.log("The project information could not be modified.", error);
+    res
+      .status(500)
+      .json({ error: "The project information could not be modified." });
   }
 });
 
