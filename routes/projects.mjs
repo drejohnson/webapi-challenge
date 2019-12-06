@@ -160,4 +160,29 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// Delete action
+router.delete("/:id/actions/:action_id", async (req, res) => {
+  const { id, action_id } = req.params;
+
+  try {
+    const project = await projectModel.get(id);
+    const removedAction = await actionModel.remove(action_id);
+
+    if (!project)
+      return res
+        .status(404)
+        .json({ message: "The project with the specified ID does not exist." });
+
+    if (!removedAction)
+      return res
+        .status(404)
+        .json({ message: "The action with the specified ID does not exist." });
+
+    res.status(200).json(removedAction);
+  } catch (error) {
+    console.log("The action could not be removed", error);
+    res.status(500).json({ error: "The action could not be removed" });
+  }
+});
+
 export default router;
