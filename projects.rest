@@ -1,0 +1,50 @@
+### Get all projects
+GET http://localhost:4000/api/projects
+
+### Get project by ID
+GET http://localhost:4000/api/projects/3
+
+### Get actions of project
+GET http://localhost:4000/api/projects/3/actions
+
+### Add project
+POST http://localhost:4000/api/projects
+Content-Type: application/json
+
+{
+  "name": "Refactor app to use GraphQL", 
+  "description": "Take the REST API and convert it to a GraphQL API"
+}
+
+### Add action
+POST http://localhost:4000/api/projects/3/actions
+Content-Type: application/json
+
+{ 
+  "project_id": 3,
+  "description": "Create a new branch",
+  "notes": "Run git checkout -b new-branch"
+}
+
+### Update project
+PUT http://localhost:4000/api/projects/3
+Content-Type: application/json
+
+{
+  "description": "Take the Node.js REST API and convert it to a GraphQL API FTW!"
+}
+
+### Update action
+PUT http://localhost:4000/api/projects/3/actions/2
+Content-Type: application/json
+
+{ 
+  "description": "To get started, Checkout a new branch",
+  "notes": "Run git checkout -b new-branch"
+}
+
+### Delete project
+DELETE http://localhost:4000/api/projects/3
+
+### Delete action
+DELETE http://localhost:4000/api/projects/3/actions/4

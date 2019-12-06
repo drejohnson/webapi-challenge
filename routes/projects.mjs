@@ -1,0 +1,188 @@
+import express from "express";
+import projectModel from "../data/helpers/projectModel.js";
+import actionModel from "../data/helpers/actionModel.js";
+
+const router = express.Router();
+
+// Get All
+router.get("/", async (req, res) => {
+  try {
+    const projects = await projectModel.get();
+    res.send(projects);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+// Get by ID
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const projects = await projectModel.get(id);
+    if (!projects)
+      return res.status(404).send({ message: "No project with that ID found" });
+    res.status(200).send(projects);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+// Get all actions of a project
+router.get("/:id/actions", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const project = await projectModel.get(id);
+    const actions = await projectModel.getProjectActions(project.id);
+
+    if (!project)
+      return res
+        .status(404)
+        .json({ message: "The project with the specified ID does not exist." });
+
+    if (!actions.length)
+      throw new Error("The actions information could not be retrieved.");
+
+    res.status(200).json(actions);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add project
+router.post("/", async (req, res) => {
+  const { name, description } = req.body;
+  if (!name || !description)
+    return res.status(400).json({
+      errorMessage: "Please provide name and description for the project."
+    });
+  try {
+    const project = await projectModel.insert(req.body);
+    res.status(201).send(project);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+// Add new action
+router.post("/:id/actions", async (req, res) => {
+  const { id } = req.params;
+  const { description, notes } = req.body;
+
+  try {
+    const project = await projectModel.get(id);
+
+    if (!project)
+      return res
+        .status(404)
+        .json({ message: "The project with the specified ID does not exist." });
+
+    if (!description || !notes)
+      return res.status(400).json({
+        errorMessage: "Please provide description and notes for the action."
+      });
+
+    const newAction = await actionModel.insert(req.body);
+
+    return res.status(201).json(newAction);
+  } catch (error) {
+    res.status(500).json({
+      error: "There was an error while saving the action to the database"
+    });
+  }
+});
+
+// Update projects
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!req.body)
+    return res
+      .status(500)
+      .json({ error: "Please provide values to update the project." });
+
+  try {
+    const project = await projectModel.get(id);
+    const updatedProject = await projectModel.update(id, req.body);
+
+    if (!project) return res.status(404).json(null);
+
+    res.status(200).json(updatedProject);
+  } catch (error) {
+    console.log("The project information could not be modified.", error);
+    res
+      .status(500)
+      .json({ error: "The project information could not be modified." });
+  }
+});
+
+// Update action
+router.put("/:id/actions/:action_id", async (req, res) => {
+  if (!req.body)
+    return res
+      .status(500)
+      .json({ error: "Please provide values to update the project." });
+
+  try {
+    const project = await projectModel.get(req.params.id);
+    const updatedAction = await actionModel.update(
+      req.params.action_id,
+      req.body
+    );
+
+    if (!project)
+      return res
+        .status(404)
+        .json({ message: "The project with the specified ID does not exist." });
+
+    res.status(200).json(updatedAction);
+  } catch (error) {
+    res.status(500).json({
+      error: "There was an error while saving the action to the database"
+    });
+  }
+});
+
+// Delete project
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const removed = await projectModel.remove(id);
+    if (!removed)
+      return res
+        .status(404)
+        .json({ message: "The project with the specified ID does not exist." });
+
+    res.status(200).json(removed);
+  } catch (error) {
+    console.log("The project could not be removed", error);
+    res.status(500).json({ error: "The project could not be removed" });
+  }
+});
+
+// Delete action
+router.delete("/:id/actions/:action_id", async (req, res) => {
+  const { id, action_id } = req.params;
+
+  try {
+    const project = await projectModel.get(id);
+    const removedAction = await actionModel.remove(action_id);
+
+    if (!project)
+      return res
+        .status(404)
+        .json({ message: "The project with the specified ID does not exist." });
+
+    if (!removedAction)
+      return res
+        .status(404)
+        .json({ message: "The action with the specified ID does not exist." });
+
+    res.status(200).json(removedAction);
+  } catch (error) {
+    console.log("The action could not be removed", error);
+    res.status(500).json({ error: "The action could not be removed" });
+  }
+});
+
+export default router;
