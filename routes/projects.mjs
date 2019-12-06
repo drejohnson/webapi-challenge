@@ -27,7 +27,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Get the actions of a project
+// Get all actions of a project
 router.get("/:id/actions", async (req, res) => {
   const { id } = req.params;
 
@@ -112,6 +112,33 @@ router.put("/:id", async (req, res) => {
     res
       .status(500)
       .json({ error: "The project information could not be modified." });
+  }
+});
+
+// Update action
+router.put("/:id/actions/:action_id", async (req, res) => {
+  if (!req.body)
+    return res
+      .status(500)
+      .json({ error: "Please provide values to update the project." });
+
+  try {
+    const project = await projectModel.get(req.params.id);
+    const updatedAction = await actionModel.update(
+      req.params.action_id,
+      req.body
+    );
+
+    if (!project)
+      return res
+        .status(404)
+        .json({ message: "The project with the specified ID does not exist." });
+
+    res.status(200).json(updatedAction);
+  } catch (error) {
+    res.status(500).json({
+      error: "There was an error while saving the action to the database"
+    });
   }
 });
 
