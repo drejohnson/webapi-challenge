@@ -2,16 +2,16 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 
-const app = express();
+const server = express();
 
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
+server.use(helmet());
+server.use(cors());
+server.use(express.json());
 
-app.get("/", (req, res) => {
+server.get("/", (req, res) => {
   res.send(`
     <h2>Web API Challenge</h2>
   `);
 });
 
-export default app;
+export default server;
