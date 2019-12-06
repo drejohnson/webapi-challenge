@@ -9,7 +9,7 @@ router.get("/", async (req, res) => {
     const projects = await projectModel.get();
     res.send(projects);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ error: error.message });
   }
 });
 
@@ -22,7 +22,29 @@ router.get("/:id", async (req, res) => {
       return res.status(404).send({ message: "No project with that ID found" });
     res.status(200).send(projects);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ error: error.message });
+  }
+});
+
+// Get the actions of a project
+router.get("/:id/actions", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const project = await projectModel.get(id);
+    const actions = await projectModel.getProjectActions(project.id);
+
+    if (!project)
+      return res
+        .status(404)
+        .json({ message: "The project with the specified ID does not exist." });
+
+    if (!actions.length)
+      throw new Error("The actions information could not be retrieved.");
+
+    res.status(200).json(actions);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -37,7 +59,7 @@ router.post("/", async (req, res) => {
     const project = await projectModel.insert(req.body);
     res.status(201).send(project);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ error: error.message });
   }
 });
 
